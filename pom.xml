@@ -7,11 +7,18 @@
     <groupId>dev.tindersamurai</groupId>
     <artifactId>eac</artifactId>
     <version>1.0.1</version>
-    <packaging>pom</packaging>
+    <packaging>jar</packaging>
 
     <name>Escapy Active Component</name>
     <description>Serializable active components for java</description>
     <url>https://github.com/henryco/escapy-active-component</url>
+
+    <scm>
+        <url>https://github.com/henryco/escapy-active-component</url>
+        <connection>scm:git:git://github.com/henryco/escapy-active-component.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com:henryco/escapy-active-component.git</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
 
     <organization>
         <name>dev.tindersamurai</name>
@@ -25,21 +32,11 @@
 
     <licenses>
         <license>
-            <name>Apache License 2.0</name>
+            <name>MIT</name>
             <url>https://github.com/henryco/escapy-active-component/blob/master/LICENSE</url>
             <distribution>repo</distribution>
         </license>
     </licenses>
-
-    <scm>
-        <url>https://github.com/henryco/escapy-active-component</url>
-        <connection>
-            scm:git:git://github.com/henryco/escapy-active-component.git
-        </connection>
-        <developerConnection>
-            scm:git:ssh://git@github.com:henryco/escapy-active-component.git
-        </developerConnection>
-    </scm>
 
     <developers>
         <developer>
@@ -62,7 +59,7 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>RELEASE</version>
+            <version>4.12</version>
         </dependency>
     </dependencies>
 
@@ -94,7 +91,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
-                        <version>RELEASE</version>
+                        <version>1.6</version>
                         <executions>
                             <execution>
                                 <id>sign-artifacts</id>
@@ -105,6 +102,14 @@
                             </execution>
                         </executions>
                     </plugin>
+<!--                    <plugin>-->
+<!--                        <groupId>org.apache.maven.plugins</groupId>-->
+<!--                        <artifactId>maven-scm-plugin</artifactId>-->
+<!--                        <version>1.11.2</version>-->
+<!--                        <configuration>-->
+<!--                            <connectionType>developerConnection</connectionType>-->
+<!--                        </configuration>-->
+<!--                    </plugin>-->
                 </plugins>
             </build>
         </profile>
