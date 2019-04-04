@@ -6,7 +6,7 @@
 
     <groupId>dev.tindersamurai</groupId>
     <artifactId>eac</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
     <packaging>jar</packaging>
 
     <name>Escapy Active Component</name>
@@ -60,6 +60,7 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.12</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
