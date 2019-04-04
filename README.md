@@ -8,13 +8,13 @@
 <dependency>
   <groupId>dev.tindersamurai</groupId>
   <artifactId>eac</artifactId>
-  <version>1.0.1</version>
+  <version>1.0.2</version>
 </dependency>
 ```
 
 ##### Gradle
 ```GROOVY
-compile 'dev.tindersamurai:eac:1.0.1'
+compile 'dev.tindersamurai:eac:1.0.2'
 ```
 
 
