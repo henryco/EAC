@@ -1,6 +1,24 @@
 # **Escapy Active Component**
+[![Maven Central](https://img.shields.io/maven-central/v/dev.tindersamurai/eac.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22dev.tindersamurai%22%20AND%20a:%22eac%22) [![License](https://img.shields.io/badge/license-MIT-green.svg)](https://raw.githubusercontent.com/henryco/escapy-active-component/master/LICENSE)
 
-Это рефлексивная библотека для сериализации и конфигурации компонентов с возможностью использования в скриптинге через внешние файлы.
+
+
+##### Maven
+```XML
+<dependency>
+  <groupId>dev.tindersamurai</groupId>
+  <artifactId>eac</artifactId>
+  <version>1.0.1</version>
+</dependency>
+```
+
+##### Gradle
+```GROOVY
+compile 'dev.tindersamurai:eac:1.0.1'
+```
+
+
+**Escapy Active Component** это рефлексивная библотека для сериализации и конфигурации компонентов с возможностью использования в скриптинге через внешние файлы.
 На данный момент существует имплементация ореентированная на работу с **`XML`** файлами, однако ничего не мешает написать свою заточенную 
 под **`JSON`**.
 
