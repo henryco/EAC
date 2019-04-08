@@ -15,6 +15,8 @@ public final class FilesCoreComponent implements EscapyComponentParserProvider {
 
 	@Override
 	public void provideParser(EscapyComponentParser parser) {
+		log.info("PROVIDE PARSER: " + parser);
+		// TODO FIXME NOT INJECTED IN ROOT LEVEL
 		this.parser = parser;
 	}
 

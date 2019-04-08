@@ -1,0 +1,10 @@
+<c:test.var xmlns:c="https://henryco.net/escapy"
+            xmlns:o="https://henryco.net/escapy"
+            xmlns:m="https://henryco.net/escapy"
+>
+
+    <c:v.string name="rooted_home">${f.home}/bloop</c:v.string>
+    <c:v.string name="rooted_work">${f.work}/bloop</c:v.string>
+    <c:v.string name="rooted_root">${f.root}/bloop</c:v.string>
+
+</c:test.var>
