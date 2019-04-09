@@ -34,11 +34,8 @@ public class XmlStreamComponentParser implements EscapyComponentParser {
 		Object instance;
 	}
 
-	@Setter private
-	IEscapyComponentFactory componentFactory;
-
-	@Setter private
-	IEscapyObjectFactory objectFactory;
+	@Setter private IEscapyComponentFactory componentFactory;
+	@Setter private IEscapyObjectFactory objectFactory;
 
 	private String contextRootPath;
 
@@ -47,6 +44,10 @@ public class XmlStreamComponentParser implements EscapyComponentParser {
 	 */
 	public XmlStreamComponentParser(Object ... componentModules) {
 		log.info("::EAC:: NEW INSTANCE: XmlStreamComponentParser " + this.hashCode());
+
+		if (componentModules.length == 0)
+			throw new RuntimeException("At least one component module (factory) required!");
+
 		setObjectFactory(IEscapyObjectFactory.Default());
 		setComponentFactory(new EscapyComponentAnnotationFactory(componentModules));
 
@@ -60,6 +61,13 @@ public class XmlStreamComponentParser implements EscapyComponentParser {
 				((EscapyObjectFactoryProvider) factory).provideObjectFactory(objectFactory);
 			return true;
 		});
+	}
+
+	/**
+	 * @param componentModuleClasses classes annotated by {@link dev.tindersamurai.eac.comp.annotation.EscapyComponentFactory}
+	 */
+	public XmlStreamComponentParser(Class<?> ... componentModuleClasses) {
+		this(Helper.instanceFromClasses(componentModuleClasses));
 	}
 
 	@Override
@@ -341,6 +349,17 @@ public class XmlStreamComponentParser implements EscapyComponentParser {
 			if (cl == null)
 				cl = "java.lang." + name.substring(0, 1).toUpperCase() + name.substring(1);
 			return cl;
+		}
+
+		private static Object[] instanceFromClasses(Class<?> ... classes) {
+			try {
+				val instances = new Object[classes.length];
+				for (int i = 0; i < classes.length; i++)
+					instances[i] = classes[i].newInstance();
+				return instances;
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
 		}
 
 	}

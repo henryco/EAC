@@ -7,6 +7,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.Map.Entry;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public interface IEscapyObjectFactory {
 
@@ -39,9 +41,9 @@ public interface IEscapyObjectFactory {
 					constructor = cla.getDeclaredConstructor(argTypes);
 					constructor.setAccessible(true);
 				} catch (NoSuchMethodException e) {
-					e.printStackTrace();
-					// TODO LOGGING
-					throw new RuntimeException("Cannot find object constructor: " + name + " " + Arrays.toString(argTypes));
+					val log = Logger.getLogger(IEscapyObjectFactory.class.getName());
+					log.log(Level.WARNING, "Cannot find object constructor", e);
+					throw new RuntimeException("Cannot find object constructor: " + name + " " + Arrays.toString(argTypes), e);
 				}
 
 				try {
