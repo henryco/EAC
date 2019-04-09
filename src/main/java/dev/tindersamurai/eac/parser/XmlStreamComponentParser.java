@@ -5,7 +5,6 @@ import lombok.Value;
 import lombok.extern.java.Log;
 import lombok.val;
 import dev.tindersamurai.eac.comp.factory.EscapyComponentAnnotationFactory;
-import dev.tindersamurai.eac.comp.factory.EscapyComponentFactoryListener;
 import dev.tindersamurai.eac.comp.factory.EscapyComponentFactoryProvider;
 import dev.tindersamurai.eac.comp.factory.IEscapyComponentFactory;
 import dev.tindersamurai.eac.obj.EscapyObjectFactoryProvider;
@@ -35,11 +34,8 @@ public class XmlStreamComponentParser implements EscapyComponentParser {
 		Object instance;
 	}
 
-	@Setter private
-	IEscapyComponentFactory componentFactory;
-
-	@Setter private
-	IEscapyObjectFactory objectFactory;
+	@Setter private IEscapyComponentFactory componentFactory;
+	@Setter private IEscapyObjectFactory objectFactory;
 
 	private String contextRootPath;
 
@@ -48,8 +44,30 @@ public class XmlStreamComponentParser implements EscapyComponentParser {
 	 */
 	public XmlStreamComponentParser(Object ... componentModules) {
 		log.info("::EAC:: NEW INSTANCE: XmlStreamComponentParser " + this.hashCode());
+
+		if (componentModules.length == 0)
+			throw new RuntimeException("At least one component module (factory) required!");
+
 		setObjectFactory(IEscapyObjectFactory.Default());
 		setComponentFactory(new EscapyComponentAnnotationFactory(componentModules));
+
+		componentFactory.setFactoryListener((name, arguments) -> {
+			Object factory = componentFactory.getFactory(name);
+			if (factory instanceof EscapyComponentParserProvider)
+				((EscapyComponentParserProvider) factory).provideParser(this);
+			if (factory instanceof EscapyComponentFactoryProvider)
+				((EscapyComponentFactoryProvider) factory).provideComponentFactory(componentFactory);
+			if (factory instanceof EscapyObjectFactoryProvider)
+				((EscapyObjectFactoryProvider) factory).provideObjectFactory(objectFactory);
+			return true;
+		});
+	}
+
+	/**
+	 * @param componentModuleClasses classes annotated by {@link dev.tindersamurai.eac.comp.annotation.EscapyComponentFactory}
+	 */
+	public XmlStreamComponentParser(Class<?> ... componentModuleClasses) {
+		this(Helper.instanceFromClasses(componentModuleClasses));
 	}
 
 	@Override
@@ -127,29 +145,9 @@ public class XmlStreamComponentParser implements EscapyComponentParser {
 		val atrName = atrs.get(ATTR_NAME);
 		val nullComponent = new UniComponent(Object.class, atrName, null);
 
-		val componentName = name.substring(1 + name.lastIndexOf(componentFactory.getNameSpaceSeparator()));
-		final EscapyComponentFactoryListener listener;
-		val factory = componentFactory.getFactory(name);
-		if (factory instanceof EscapyComponentFactoryListener)
-			listener = (EscapyComponentFactoryListener) factory;
-		else listener = null;
-
-		if (factory instanceof EscapyComponentParserProvider)
-			((EscapyComponentParserProvider) factory).provideParser(this);
-		if (factory instanceof EscapyComponentFactoryProvider)
-			((EscapyComponentFactoryProvider) factory).provideComponentFactory(componentFactory);
-		if (factory instanceof EscapyObjectFactoryProvider)
-			((EscapyObjectFactoryProvider) factory).provideObjectFactory(objectFactory);
-
-		boolean enter = true;
-		if (listener != null && !listener.enterComponent(componentName))
-			enter = false;
-
 		int count = -1;
 		while (reader.hasNext()) {
 			reader.next();
-
-			if (!enter) continue;
 
 			if (reader.isCharacters()) {
 				val text = reader.getText().trim();
@@ -193,13 +191,6 @@ public class XmlStreamComponentParser implements EscapyComponentParser {
 			}
 
 			if (reader.isEndElement() && name.equals(reader.getLocalName())) {
-
-				if (listener != null) {
-					val component = listener.leaveComponent(componentName, componentFactory.createComponent(name, args));
-					if (component == null)
-						return nullComponent;
-					return new UniComponent(component.getClass(), atrName, component);
-				}
 
 				val component = componentFactory.createComponent(name, args);
 				if (component == null)
@@ -358,6 +349,17 @@ public class XmlStreamComponentParser implements EscapyComponentParser {
 			if (cl == null)
 				cl = "java.lang." + name.substring(0, 1).toUpperCase() + name.substring(1);
 			return cl;
+		}
+
+		private static Object[] instanceFromClasses(Class<?> ... classes) {
+			try {
+				val instances = new Object[classes.length];
+				for (int i = 0; i < classes.length; i++)
+					instances[i] = classes[i].newInstance();
+				return instances;
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
 		}
 
 	}

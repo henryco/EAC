@@ -1,6 +1,8 @@
 package dev.tindersamurai.eac.comp.factory;
 
 import lombok.Getter;
+import lombok.Setter;
+import lombok.extern.java.Log;
 import lombok.val;
 import dev.tindersamurai.eac.comp.annotation.Arg;
 import dev.tindersamurai.eac.comp.annotation.EscapyComponent;
@@ -13,12 +15,13 @@ import java.lang.reflect.Parameter;
 import java.util.*;
 import java.util.function.Function;
 
-
+@Log
 public class EscapyComponentAnnotationFactory implements IEscapyComponentFactory {
 
 	private final Map<String, Function<Map<String, Object>, Object>> constructors;
 	private final Map<String, Object> factories;
 	private @Getter final String nameSpaceSeparator;
+	private @Setter FactoryListener factoryListener;
 
 	public EscapyComponentAnnotationFactory(String nameSpaceSeparator, Collection<Object> componentFactories) {
 		this(nameSpaceSeparator, componentFactories.toArray());
@@ -175,9 +178,24 @@ public class EscapyComponentAnnotationFactory implements IEscapyComponentFactory
 
 	@Override
 	public <T> T createComponent(String name, Map<String, Object> arguments) {
+
+		if (factoryListener != null) {
+			factoryListener.beforeCreateComponent(name, arguments);
+		}
+
+		val cName = name.substring(1 + name.lastIndexOf(getNameSpaceSeparator()));
+		val factory = getFactory(name);
+
+		val listener = factory instanceof EscapyComponentFactoryListener
+				? (EscapyComponentFactoryListener) factory
+				: null;
+		if (listener != null && !listener.enterComponent(cName))
+			return null;
 		try {
 			//noinspection unchecked
-			return (T) constructors.get(name).apply(arguments);
+			val result = (T) constructors.get(name).apply(arguments);
+			//noinspection unchecked
+			return listener != null ? (T) listener.leaveComponent(cName, result) : result;
 		} catch (NullPointerException e) {
 			val msg= "NULL_POINTER COMPONENT: " + name
 					+ "\nCONSTRUCTOR: " + constructors.get(name)
