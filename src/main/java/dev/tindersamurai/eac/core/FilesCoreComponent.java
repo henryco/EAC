@@ -8,7 +8,7 @@ import dev.tindersamurai.eac.parser.EscapyComponentParserProvider;
 
 import java.nio.file.NoSuchFileException;
 
-@EscapyComponentFactory("f") @Log// l for Loader
+@EscapyComponentFactory("f") @Log// f for Files
 public final class FilesCoreComponent implements EscapyComponentParserProvider {
 
 	private EscapyComponentParser parser;

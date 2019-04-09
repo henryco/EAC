@@ -119,10 +119,48 @@ public class XmlStreamComponentParser implements EscapyComponentParser {
 			log.throwing(this.getClass().getName(), "parseComponent",
 					new RuntimeException("Escapy Active Component parsing error", e)
 			);
-			e.printStackTrace();
 		}
 
 		if (lastRoot != null) contextRootPath = lastRoot;
+		return null;
+	}
+
+	@Override
+	public <T> T parseComponent(InputStream inputStream, String contextRootPath) {
+		log.info("PARSE STREAM: " + inputStream);
+		this.contextRootPath = contextRootPath;
+
+		log.info("::EAC:: Context root path: " + contextRootPath + " | " + this.hashCode());
+
+		try {
+			XMLInputFactory inputFactory = XMLInputFactory.newInstance();
+			XMLStreamReader reader = inputFactory.createXMLStreamReader(inputStream);
+
+			if (!reader.hasNext()) {
+				if (contextRootPath != null) this.contextRootPath = contextRootPath;
+				return null;
+			}
+
+			reader.next();
+
+			if (reader.getPrefix() == null || !reader.getPrefix().equals(PREFIX_COMPONENT)) {
+				if (contextRootPath != null) this.contextRootPath = contextRootPath;
+				return null;
+			}
+
+			final UniComponent component = onComponent(reader);
+			if (contextRootPath != null) this.contextRootPath = contextRootPath;
+			//noinspection unchecked
+			return (T) (component != null ? component.instance : null);
+
+		} catch (Exception e) {
+			log.throwing(this.getClass().getName(), "parseComponent",
+					new RuntimeException("Escapy Active Component parsing error", e)
+			);
+		}
+
+		if (contextRootPath != null)
+			this.contextRootPath = contextRootPath;
 		return null;
 	}
 

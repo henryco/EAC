@@ -8,13 +8,13 @@
 <dependency>
   <groupId>dev.tindersamurai</groupId>
   <artifactId>eac</artifactId>
-  <version>1.0.2</version>
+  <version>1.0.3</version>
 </dependency>
 ```
 
 ##### Gradle
 ```GROOVY
-compile 'dev.tindersamurai:eac:1.0.2'
+compile 'dev.tindersamurai:eac:1.0.3'
 ```
 
 
@@ -49,6 +49,27 @@ compile 'dev.tindersamurai:eac:1.0.2'
 сведется к созданию стандартной имплементации интерфейса - **`XmlStreamComponentParser`**, конструктор которого
 в качестве входных параметров получает массив Фабрик-компонентов 
 и вызову метода **`<T> T parseComponent(String file);`**.
+
+```JAVA
+public final class ExampleMain {
+
+	@EscapyComponentFactory("test")
+	public static final class TestComponent {
+		@EscapyComponent("create_int")
+		public int createInt(@Arg("SomeVal") String value) {
+			// ...
+			return 42;
+		}
+	}
+
+	public static void main(String ... args) throws NoSuchFileException {
+		final EscapyComponentParser parser = new XmlStreamComponentParser(new TestComponent());
+		final String file = System.getProperty("user.dir") + "/resources/example.xml";
+		Object result = parser.parseComponent(file);
+		// ...
+	}
+}
+```
 
 
 **Не следует путать `IEscapyComponentFactory` и фабрики компонентов отмеченные аннотацией `@EscapyComponentFactory`, это не одно и тоже!**
@@ -104,12 +125,25 @@ compile 'dev.tindersamurai:eac:1.0.2'
 
 * **`@EscapyComponent("type") Class<?> primitiveType(@Arg("object") Object o);`**
 
-C полным списком можно ознакомиться заглянув в класс-фабрику **```java UtilityCoreComponent```**.
+C полным списком можно ознакомиться заглянув в класс-фабрику **```UtilityCoreComponent.java```**.
 
 ### **INCLUDES**
 Библиотека позволяет подключать компоненты и объекты из внешних файлов
 с помощью директивы **`<c:f.include / >`** принимающей в качестве аргумента
 **`String`** путь к файлу.
+C полным списком стандартных компонентов работающих с файлами можно ознакомится
+в классе фабрике **```FilesCoreComponent.java```**
+
+### **VARIABLES AND EXPRESSIONS**
+С некоторых пор появилась возможность использовать переменные, а так же обрабатывать 
+компоненты прямо в стрингах c помощью нотации ```${...}```, для этого служит компонент ```v.string```
+пример его использования: 
+```xml
+<c:v.string name="rooted_root">${f.root}/bloop</c:v.string>
+```
+Полный список полезных компонентов можно найти в классе 
+```VariablesCoreComponent.java```
+
 
 ### **Code example**
 
