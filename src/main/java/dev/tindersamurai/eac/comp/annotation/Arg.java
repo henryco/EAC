@@ -15,4 +15,6 @@ public @interface Arg {
 	 * Argument name required
 	 * for serialization binding
 	 */ String value();
+
+	 String def() default "";
 }

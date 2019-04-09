@@ -5,7 +5,6 @@ import lombok.Value;
 import lombok.extern.java.Log;
 import lombok.val;
 import dev.tindersamurai.eac.comp.factory.EscapyComponentAnnotationFactory;
-import dev.tindersamurai.eac.comp.factory.EscapyComponentFactoryListener;
 import dev.tindersamurai.eac.comp.factory.EscapyComponentFactoryProvider;
 import dev.tindersamurai.eac.comp.factory.IEscapyComponentFactory;
 import dev.tindersamurai.eac.obj.EscapyObjectFactoryProvider;
@@ -50,6 +49,17 @@ public class XmlStreamComponentParser implements EscapyComponentParser {
 		log.info("::EAC:: NEW INSTANCE: XmlStreamComponentParser " + this.hashCode());
 		setObjectFactory(IEscapyObjectFactory.Default());
 		setComponentFactory(new EscapyComponentAnnotationFactory(componentModules));
+
+		componentFactory.setFactoryListener((name, arguments) -> {
+			Object factory = componentFactory.getFactory(name);
+			if (factory instanceof EscapyComponentParserProvider)
+				((EscapyComponentParserProvider) factory).provideParser(this);
+			if (factory instanceof EscapyComponentFactoryProvider)
+				((EscapyComponentFactoryProvider) factory).provideComponentFactory(componentFactory);
+			if (factory instanceof EscapyObjectFactoryProvider)
+				((EscapyObjectFactoryProvider) factory).provideObjectFactory(objectFactory);
+			return true;
+		});
 	}
 
 	@Override
@@ -127,29 +137,9 @@ public class XmlStreamComponentParser implements EscapyComponentParser {
 		val atrName = atrs.get(ATTR_NAME);
 		val nullComponent = new UniComponent(Object.class, atrName, null);
 
-		val componentName = name.substring(1 + name.lastIndexOf(componentFactory.getNameSpaceSeparator()));
-		final EscapyComponentFactoryListener listener;
-		val factory = componentFactory.getFactory(name);
-		if (factory instanceof EscapyComponentFactoryListener)
-			listener = (EscapyComponentFactoryListener) factory;
-		else listener = null;
-
-		if (factory instanceof EscapyComponentParserProvider)
-			((EscapyComponentParserProvider) factory).provideParser(this);
-		if (factory instanceof EscapyComponentFactoryProvider)
-			((EscapyComponentFactoryProvider) factory).provideComponentFactory(componentFactory);
-		if (factory instanceof EscapyObjectFactoryProvider)
-			((EscapyObjectFactoryProvider) factory).provideObjectFactory(objectFactory);
-
-		boolean enter = true;
-		if (listener != null && !listener.enterComponent(componentName))
-			enter = false;
-
 		int count = -1;
 		while (reader.hasNext()) {
 			reader.next();
-
-			if (!enter) continue;
 
 			if (reader.isCharacters()) {
 				val text = reader.getText().trim();
@@ -193,13 +183,6 @@ public class XmlStreamComponentParser implements EscapyComponentParser {
 			}
 
 			if (reader.isEndElement() && name.equals(reader.getLocalName())) {
-
-				if (listener != null) {
-					val component = listener.leaveComponent(componentName, componentFactory.createComponent(name, args));
-					if (component == null)
-						return nullComponent;
-					return new UniComponent(component.getClass(), atrName, component);
-				}
 
 				val component = componentFactory.createComponent(name, args);
 				if (component == null)
